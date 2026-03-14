@@ -42,7 +42,8 @@ Track implementation steps here. Update this file after every meaningful change.
 - [x] Dynamic interests: add/remove with optional category (Supabase `public.user_interests`)
 - [x] Profile save via `POST /api/profile/save` (profiles + user_interests + user_embeddings); see `docs/supabase-rls.md` for RLS. Embeddings use Google Gemini (`gemini-embedding-001`, 1536 dims via outputDimensionality for pgvector ivfflat); profile save is not blocked if embedding fails.
 - [x] Interest suggestions via `POST /api/profile/suggestions` (Groq, server-side); createDefaultSectionData() factory
-- [x] Profile flow: step 1 = name, age, email + “Continue to interests”; step 2 = interests + Save
+- [x] Profile flow: first-time setup (step 1 = name, age, email → step 2 = interests + Save)
+- [x] Returning-user profile UX: read-only display with separate Edit basics / Edit interests views
 - [ ] Groq LLaMA 3.3 70B drill-down: multi-level interests (e.g. Anime → Attack on Titan)
 - [ ] Save profile → backend; Groq 20D cultural vector; index in Elasticsearch (uses `userId` from Supabase JWT)
 
@@ -114,4 +115,4 @@ Track implementation steps here. Update this file after every meaningful change.
 
 ---
 
-*Last updated: Gemini embeddings set to 1536 dims for pgvector ivfflat compatibility.*
+*Last updated: Profile page now has first-time setup vs returning-user display/edit flows.*

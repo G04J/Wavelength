@@ -7,6 +7,13 @@ import type { SectionData, InterestSectionId } from "@/types/database";
 import { SearchSection } from "@/components/profile/SearchSection";
 import type { InterestSection } from "@/components/profile/SearchSection";
 
+type ProfileMode =
+  | "setup-basics"
+  | "setup-interests"
+  | "display"
+  | "edit-basics"
+  | "edit-interests";
+
 const INTEREST_SECTIONS: InterestSection[] = [
   { id: "music", label: "Music", placeholder: "search artists, albums, genres…" },
   { id: "tv", label: "TV & Film", placeholder: "search shows, movies, directors…" },
@@ -132,6 +139,65 @@ const styles = {
     color: "#2d7a2d",
     marginTop: "0.5rem",
   },
+  profileHeader: {
+    display: "flex",
+    flexDirection: "column" as const,
+    gap: "0.25rem",
+    marginBottom: "1.25rem",
+  },
+  profileRow: {
+    marginBottom: "0.75rem",
+  },
+  profileLabel: {
+    fontSize: "0.75rem",
+    fontWeight: 600,
+    textTransform: "uppercase" as const,
+    letterSpacing: "0.06em",
+    color: "#b08080",
+    marginBottom: "0.125rem",
+  },
+  profileValue: {
+    fontSize: "0.95rem",
+    color: "#3a1a1a",
+  },
+  interestGroup: {
+    marginTop: "1rem",
+  },
+  interestGroupHeader: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "0.5rem",
+    marginBottom: "0.5rem",
+  },
+  interestGroupTitle: {
+    fontSize: "0.9rem",
+    fontWeight: 600,
+    color: "#3a1a1a",
+  },
+  interestTags: {
+    display: "flex",
+    flexWrap: "wrap" as const,
+    gap: "0.5rem",
+  },
+  interestTag: {
+    padding: "0.3rem 0.75rem",
+    borderRadius: 999,
+    background: "rgba(224, 96, 96, 0.08)",
+    color: "#5a3a3a",
+    fontSize: "0.8rem",
+  },
+  interestEmpty: {
+    fontSize: "0.8rem",
+    color: "#b08080",
+    fontStyle: "italic",
+  },
+  buttonRow: {
+    display: "flex",
+    flexWrap: "wrap" as const,
+    gap: "0.75rem",
+    marginTop: "1.25rem",
+  },
 };
 
 export default function ProfilePage() {
@@ -140,7 +206,11 @@ export default function ProfilePage() {
   const [age, setAge] = useState("");
   const [email, setEmail] = useState("");
   const [sectionData, setSectionData] = useState<SectionData>(() => createDefaultSectionData());
-  const [step, setStep] = useState<1 | 2>(1);
+  const [mode, setMode] = useState<ProfileMode>("setup-basics");
+  const [initialProfile, setInitialProfile] = useState<{ name: string; age: string; email: string } | null>(
+    null
+  );
+  const [initialSectionData, setInitialSectionData] = useState<SectionData>(() => createDefaultSectionData());
   const [step1Error, setStep1Error] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -170,9 +240,13 @@ export default function ProfilePage() {
       return;
     }
     if (profile) {
-      setName(profile.name ?? "");
-      setAge(profile.age != null ? String(profile.age) : "");
-      setEmail(profile.email ?? user.email ?? "");
+      const nextName = profile.name ?? "";
+      const nextAge = profile.age != null ? String(profile.age) : "";
+      const nextEmail = profile.email ?? user.email ?? "";
+      setName(nextName);
+      setAge(nextAge);
+      setEmail(nextEmail);
+      setInitialProfile({ name: nextName, age: nextAge, email: nextEmail });
     }
 
     const { data: interestRows, error: interestsError } = await supabase
@@ -193,7 +267,14 @@ export default function ProfilePage() {
         }
       }
       setSectionData(grouped);
+      setInitialSectionData(grouped);
     }
+
+    const hasAnyProfile =
+      !!profile ||
+      !!(interestRows && interestRows.length > 0);
+
+    setMode(hasAnyProfile ? "display" : "setup-basics");
     setLoading(false);
   }, []);
 
@@ -229,11 +310,10 @@ export default function ProfilePage() {
 
   function handleContinueToInterests() {
     if (!validateStep1()) return;
-    setStep(2);
+    setMode("setup-interests");
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function saveProfile() {
     if (!userId) return;
     setError(null);
     setSuccess(false);
@@ -289,7 +369,46 @@ export default function ProfilePage() {
     setError(null);
     setSuccess(true);
     setSaving(false);
+    setInitialProfile({
+      name: nameTrim,
+      age: ageNum != null ? String(ageNum) : "",
+      email: emailTrim,
+    });
+    setInitialSectionData({
+      music: sectionData.music ?? [],
+      tv: sectionData.tv ?? [],
+      games: sectionData.games ?? [],
+      interests: sectionData.interests ?? [],
+    });
+    setMode("display");
     loadProfile();
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    await saveProfile();
+  }
+
+  async function handleSaveBasics() {
+    if (!validateStep1()) return;
+    await saveProfile();
+  }
+
+  function handleCancelEditBasics() {
+    if (initialProfile) {
+      setName(initialProfile.name);
+      setAge(initialProfile.age);
+      setEmail(initialProfile.email);
+    }
+    setError(null);
+    setStep1Error(null);
+    setMode("display");
+  }
+
+  function handleCancelEditInterests() {
+    setSectionData(initialSectionData);
+    setError(null);
+    setMode("display");
   }
 
   async function handleSignOut() {
@@ -360,59 +479,81 @@ export default function ProfilePage() {
       </nav>
 
       <div style={styles.card}>
-        <h1 style={styles.title}>Profile</h1>
-
-        {step === 1 && (
-          <>
+        <div style={styles.profileHeader}>
+          <h1 style={styles.title}>Profile</h1>
+          {mode === "setup-basics" && (
             <p style={styles.subtitle}>
               Start with the basics. You can add interests next.
             </p>
-            <div style={styles.form}>
-              <div>
-                <label htmlFor="name" style={styles.label}>
-                  Name
-                </label>
-                <input
-                  id="name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  placeholder="Your name"
-                  style={styles.input}
-                  autoComplete="name"
-                />
-              </div>
-              <div>
-                <label htmlFor="age" style={styles.label}>
-                  Age (18+)
-                </label>
-                <input
-                  id="age"
-                  type="number"
-                  min={18}
-                  value={age}
-                  onChange={(e) => setAge(e.target.value)}
-                  placeholder="e.g. 25"
-                  style={styles.input}
-                />
-              </div>
-              <div>
-                <label htmlFor="email" style={styles.label}>
-                  Email
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  placeholder="you@example.com"
-                  style={styles.input}
-                  autoComplete="email"
-                />
-              </div>
-              {step1Error && <p style={styles.error}>{step1Error}</p>}
+          )}
+          {mode === "setup-interests" && (
+            <p style={styles.subtitle}>
+              Add interests by category. Type and press Enter or click Add; suggestions may appear when available.
+            </p>
+          )}
+          {mode === "display" && (
+            <p style={styles.subtitle}>This is how you appear on Wavelength.</p>
+          )}
+          {mode === "edit-basics" && (
+            <p style={styles.subtitle}>Update your basic details. Changes save for your profile.</p>
+          )}
+          {mode === "edit-interests" && (
+            <p style={styles.subtitle}>Tweak your interests by category. Add or remove anything that no longer fits.</p>
+          )}
+        </div>
+
+        {error && <p style={styles.error}>{error}</p>}
+        {success && <p style={styles.success}>Profile saved.</p>}
+
+        {(mode === "setup-basics" || mode === "edit-basics") && (
+          <div style={styles.form}>
+            <div>
+              <label htmlFor="name" style={styles.label}>
+                Name
+              </label>
+              <input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                placeholder="Your name"
+                style={styles.input}
+                autoComplete="name"
+              />
+            </div>
+            <div>
+              <label htmlFor="age" style={styles.label}>
+                Age (18+)
+              </label>
+              <input
+                id="age"
+                type="number"
+                min={18}
+                value={age}
+                onChange={(e) => setAge(e.target.value)}
+                placeholder="e.g. 25"
+                style={styles.input}
+              />
+            </div>
+            <div>
+              <label htmlFor="email" style={styles.label}>
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="you@example.com"
+                style={styles.input}
+                autoComplete="email"
+              />
+            </div>
+            {step1Error && <p style={styles.error}>{step1Error}</p>}
+
+            {mode === "setup-basics" && (
               <button
                 type="button"
                 onClick={handleContinueToInterests}
@@ -420,22 +561,41 @@ export default function ProfilePage() {
               >
                 Continue to interests →
               </button>
-            </div>
-          </>
+            )}
+
+            {mode === "edit-basics" && (
+              <div style={styles.buttonRow}>
+                <button
+                  type="button"
+                  onClick={handleSaveBasics}
+                  style={{ ...styles.button, ...styles.buttonPrimary }}
+                  disabled={saving}
+                >
+                  {saving ? "Saving…" : "Save basics"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancelEditBasics}
+                  style={{ ...styles.button, ...styles.buttonSecondary }}
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
         )}
 
-        {step === 2 && (
+        {(mode === "setup-interests" || mode === "edit-interests") && (
           <>
-            <p style={styles.subtitle}>
-              Add interests by category. Type and press Enter or click Add; suggestions may appear when available.
-            </p>
-            <button
-              type="button"
-              onClick={() => setStep(1)}
-              style={styles.backLink}
-            >
-              ← Back to name, age, email
-            </button>
+            {mode === "setup-interests" && (
+              <button
+                type="button"
+                onClick={() => setMode("setup-basics")}
+                style={styles.backLink}
+              >
+                ← Back to name, age, email
+              </button>
+            )}
 
             <form onSubmit={handleSubmit} style={styles.form}>
               <div>
@@ -450,13 +610,85 @@ export default function ProfilePage() {
                 ))}
               </div>
 
-              {error && <p style={styles.error}>{error}</p>}
-              {success && <p style={styles.success}>Profile saved.</p>}
-
-              <button type="submit" style={{ ...styles.button, ...styles.buttonPrimary }} disabled={saving}>
-                {saving ? "Saving…" : "Save profile"}
-              </button>
+              <div style={styles.buttonRow}>
+                <button
+                  type="submit"
+                  style={{ ...styles.button, ...styles.buttonPrimary }}
+                  disabled={saving}
+                >
+                  {saving ? "Saving…" : "Save profile"}
+                </button>
+                {mode === "edit-interests" && (
+                  <button
+                    type="button"
+                    onClick={handleCancelEditInterests}
+                    style={{ ...styles.button, ...styles.buttonSecondary }}
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
             </form>
+          </>
+        )}
+
+        {mode === "display" && (
+          <>
+            <div>
+              <div style={styles.profileRow}>
+                <div style={styles.profileLabel}>Name</div>
+                <div style={styles.profileValue}>{name || "—"}</div>
+              </div>
+              <div style={styles.profileRow}>
+                <div style={styles.profileLabel}>Age</div>
+                <div style={styles.profileValue}>{age || "—"}</div>
+              </div>
+              <div style={styles.profileRow}>
+                <div style={styles.profileLabel}>Email</div>
+                <div style={styles.profileValue}>{email || "—"}</div>
+              </div>
+            </div>
+
+            <div>
+              {INTEREST_SECTIONS.map((section) => {
+                const items = sectionData[section.id as InterestSectionId] ?? [];
+                return (
+                  <div key={section.id} style={styles.interestGroup}>
+                    <div style={styles.interestGroupHeader}>
+                      <span style={styles.interestGroupTitle}>{section.label}</span>
+                    </div>
+                    {items.length ? (
+                      <div style={styles.interestTags}>
+                        {items.map((item) => (
+                          <span key={item} style={styles.interestTag}>
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <div style={styles.interestEmpty}>No {section.label.toLowerCase()} added yet.</div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            <div style={styles.buttonRow}>
+              <button
+                type="button"
+                style={{ ...styles.button, ...styles.buttonPrimary }}
+                onClick={() => setMode("edit-basics")}
+              >
+                Edit basics
+              </button>
+              <button
+                type="button"
+                style={{ ...styles.button, ...styles.buttonSecondary }}
+                onClick={() => setMode("edit-interests")}
+              >
+                Edit interests
+              </button>
+            </div>
           </>
         )}
       </div>
