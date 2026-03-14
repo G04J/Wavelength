@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { io, type Socket } from "socket.io-client";
 import { useLiveLocation } from "@/contexts/LocationContext";
+import { createClient } from "@/utils/supabase/client";
 
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL ?? "http://localhost:3001";
 
@@ -13,7 +14,14 @@ const WS_URL = process.env.NEXT_PUBLIC_WS_URL ?? "http://localhost:3001";
 export function useLocationSocketSync() {
   const { position, status } = useLiveLocation();
   const socketRef = useRef<Socket | null>(null);
+  const userIdRef = useRef<string | null>(null);
 
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data }: { data: { user: { id: string } | null } }) => {
+      userIdRef.current = data.user?.id ?? null
+    })
+  }, [])
   // Keep one socket while watching; disconnect when no longer watching
   useEffect(() => {
     if (status !== "watching") {

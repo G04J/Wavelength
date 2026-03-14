@@ -3,6 +3,9 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
 import { requireAuth } from "./middleware/auth.js";
+import { createUsersIndex } from "./lib/elasticsearch.js"
+import { esClient } from "./lib/elasticsearch.js"
+import "dotenv/config"
 
 const app = express();
 const httpServer = createServer(app);
@@ -37,20 +40,58 @@ const io = new Server(httpServer, {
 const lastPositionBySocket = new Map<string, { lat: number; lng: number }>();
 
 io.on("connection", (socket) => {
-  console.log("[Backend] Socket connected:", socket.id);
-  socket.on("location", (data: { lat: number; lng: number }) => {
+  console.log("[Backend] Socket connected:", socket.id)
+
+  socket.on("location", async (data: { lat: number; lng: number; userId: string }) => {
     if (typeof data?.lat === "number" && typeof data?.lng === "number") {
-      lastPositionBySocket.set(socket.id, { lat: data.lat, lng: data.lng });
-      console.log("[Backend] Location update", { socketId: socket.id, lat: data.lat.toFixed(4), lng: data.lng.toFixed(4) });
+      lastPositionBySocket.set(socket.id, { lat: data.lat, lng: data.lng })
+
+      // upsert into Elasticsearch
+      await esClient.index({
+        index: "users",
+        id: data.userId,
+        document: {
+          userId: data.userId,
+          location: { lat: data.lat, lon: data.lng },
+          updatedAt: new Date().toISOString(),
+        },
+      })
+
+      // find everyone within 2km
+      const nearby = await esClient.search({
+        index: "users",
+        query: {
+          geo_distance: {
+            distance: "2km",
+            location: { lat: data.lat, lon: data.lng },
+          },
+        },
+      })
+
+      const nearbyUsers = nearby.hits.hits
+        .filter(hit => hit._id !== data.userId)
+        .map(hit => hit._source)
+
+      socket.emit("nearby_users", nearbyUsers)
     }
-  });
+  })
+
   socket.on("disconnect", () => {
-    lastPositionBySocket.delete(socket.id);
-    console.log("[Backend] Socket disconnected:", socket.id);
-  });
-});
+    lastPositionBySocket.delete(socket.id)
+    console.log("[Backend] Socket disconnected:", socket.id)
+  })
+})
 
 const PORT = process.env.PORT ?? 3001;
-httpServer.listen(PORT, () => {
-  console.log("[Backend] Listening on http://localhost:" + PORT);
-});
+
+async function start() {
+  await createUsersIndex()
+  httpServer.listen(PORT, () => {
+    console.log("[Backend] Listening on http://localhost:" + PORT)
+  })
+}
+
+start()
+
+
+
