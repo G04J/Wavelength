@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Wavelength — Find your people nearby",
   description:
-    "Anonymous compatibility between people in the same physical space. Mutual interest only.",
+    "Compatibility between people in the same physical space. Connect only when interest is mutual.",
 };
 
 export default function RootLayout({

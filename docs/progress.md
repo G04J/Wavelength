@@ -50,6 +50,7 @@ Track implementation steps here. Update this file after every meaningful change.
 - [ ] Left panel: “Find your people nearby.”, live count, quote
 - [ ] Compatibility range slider (e.g. 40–95%), “Show Matches” button
 - [ ] Click heart → profile popup: compatibility %, shared interests, Connect/Chat button
+- [x] “How it works” link from map → dedicated page (/how-it-works) with steps; cream/red theme, Plus Jakarta Sans
 
 ---
 
@@ -94,4 +95,4 @@ Track implementation steps here. Update this file after every meaningful change.
 
 ---
 
-*Last updated: after 3D animated hearts and visible same-thickness red threads (MapsScreen).*
+*Last updated: after adding How it works page (/how-it-works) linked from map.*

@@ -123,7 +123,7 @@ export default function LandingScreen({ onEnter }: { onEnter: () => void }) {
         >
           <div style={{ width:6, height:6, borderRadius:"50%", background:"#e08080" }}/>
           <span style={{ fontSize:"0.68rem", letterSpacing:"0.15em", textTransform:"uppercase", color:"#e08080", fontWeight:600 }}>
-            anonymous &amp; mutual
+            mutual vibes only
           </span>
         </motion.div>
 
@@ -139,7 +139,7 @@ export default function LandingScreen({ onEnter }: { onEnter: () => void }) {
           initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay:0.35, duration:0.5 }}
           style={{ fontSize:"0.88rem", color:"#b08080", lineHeight:1.8, maxWidth:260, marginBottom:"2rem" }}
         >
-          find them nearby, anonymously.
+          discover who's nearby.
         </motion.p>
 
         <motion.button

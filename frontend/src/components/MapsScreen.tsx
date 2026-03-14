@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import Link from "next/link";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -183,7 +184,7 @@ function ProfilePopup({ user, onClose, onChat }: {
         fontSize: 11, color: "#C0392B", fontWeight: 600,
         marginBottom: 12, letterSpacing: "0.03em",
       }}>
-        <span style={{ fontSize: 10 }}>✦</span> ANONYMOUS & MUTUAL
+        <span style={{ fontSize: 10 }}>✦</span> MUTUAL VIBES ONLY
       </div>
 
       <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 14 }}>
@@ -207,7 +208,7 @@ function ProfilePopup({ user, onClose, onChat }: {
             {pct >= 80 ? "Strong match" : pct >= 60 ? "Good match" : "Possible match"}
           </div>
           <div style={{ fontSize: 12, color: "#888" }}>
-            {user.name ?? "Anonymous nearby"}
+            {user.name ?? "Someone nearby"}
           </div>
         </div>
       </div>
@@ -373,7 +374,7 @@ export default function MapScreen({ onChatRequest }: { onChatRequest?: (uid: str
         display: "flex", alignItems: "center", justifyContent: "space-between",
         padding: "0 20px", zIndex: 800,
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
           <svg width={20} height={14} viewBox="0 0 20 14">
             <polyline points="0,7 3,2 6,12 9,4 12,10 15,7 18,7"
               fill="none" stroke="#C0392B" strokeWidth={1.8}
@@ -382,7 +383,7 @@ export default function MapScreen({ onChatRequest }: { onChatRequest?: (uid: str
           <span style={{ fontSize: 17, fontWeight: 600, color: "#1a1a1a", letterSpacing: "-0.3px" }}>
             wavelength
           </span>
-        </div>
+        </Link>
         <div style={{ display: "flex", gap: 8 }}>
           <button style={{
             background: "white", border: "0.5px solid rgba(0,0,0,0.12)",
@@ -441,7 +442,7 @@ export default function MapScreen({ onChatRequest }: { onChatRequest?: (uid: str
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
           <span style={{ color: "#C0392B", fontSize: 12 }}>✦</span>
-          <span style={{ fontSize: 12, color: "#C0392B", fontWeight: 600 }}>Anonymous & mutual</span>
+          <span style={{ fontSize: 12, color: "#C0392B", fontWeight: 600 }}>Mutual vibes only</span>
         </div>
         <p style={{ fontSize: 15, lineHeight: 1.5, color: "#1a1a1a", fontWeight: 500, marginBottom: 6 }}>
           The person next to you might be your{" "}
@@ -450,11 +451,16 @@ export default function MapScreen({ onChatRequest }: { onChatRequest?: (uid: str
         <p style={{ fontSize: 13, color: "#888", marginBottom: 14, lineHeight: 1.5 }}>
           You just don't know it yet.
         </p>
-        <button style={{
-          background: "none", border: "none",
-          fontSize: 13, color: "#C0392B", fontWeight: 600,
-          cursor: "pointer", padding: 0,
-        }}>How it works →</button>
+        <Link
+          href="/how-it-works"
+          style={{
+            background: "none", border: "none",
+            fontSize: 13, color: "#C0392B", fontWeight: 600,
+            cursor: "pointer", padding: 0, textDecoration: "none",
+          }}
+        >
+          How it works →
+        </Link>
       </div>
 
       {selectedUser && (
