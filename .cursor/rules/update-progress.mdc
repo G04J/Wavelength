@@ -1,0 +1,14 @@
+---
+description: Update docs/progress.md after every meaningful change to the project
+alwaysApply: true
+---
+
+# Update progress after changes
+
+After making any meaningful change to the Wavelength project (new features, completed steps, refactors, or config updates):
+
+1. **Open** [docs/progress.md](docs/progress.md).
+2. **Update** the relevant section: check off completed items `[x]`, add new items if the plan changed, or add a short note under the section.
+3. **Refresh** the “Last updated” line at the bottom with a brief note (e.g. “after adding Discover map”) or the date.
+
+Keep progress.md as the single source of truth for what’s done and what’s next. Do not skip this step when you have modified project behaviour or scope.
