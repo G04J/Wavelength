@@ -177,6 +177,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Failed to save profile. Please try again." }, { status: 500 });
     }
   }
+  // 4) save vector to Elasticsearch
+  try {
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3001"
+    await fetch(`${backendUrl}/api/profile`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, sectionData: safeSectionData }),
+    })
+  } catch (err) {
+    console.error("[API profile/save] ES vector save failed (non-blocking):", err)
+  }
 
   return NextResponse.json({ ok: true });
 }

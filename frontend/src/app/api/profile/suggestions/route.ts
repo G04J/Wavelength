@@ -47,7 +47,7 @@ function parseSuggestions(raw: unknown): string[] {
   const strings = raw
     .map((s) => (typeof s === "string" ? String(s).trim() : ""))
     .filter(Boolean);
-  return [...new Set(strings)].slice(0, MAX_SUGGESTIONS);
+  return Array.from(new Set(strings)).slice(0, MAX_SUGGESTIONS)
 }
 
 function isObviousProperNoun(value: string): boolean {
@@ -84,7 +84,7 @@ function parseInterestSuggestions(raw: unknown): string[] {
     lowered.push(original.toLowerCase());
   }
 
-  return [...new Set(lowered)].slice(0, MAX_SUGGESTIONS);
+  return Array.from(new Set(lowered)).slice(0, MAX_SUGGESTIONS);
 }
 
 function buildInterestFallback(query: string): string[] {
@@ -93,7 +93,7 @@ function buildInterestFallback(query: string): string[] {
     ? INTEREST_FALLBACKS.filter((item) => item.toLowerCase().includes(q))
     : INTEREST_FALLBACKS;
 
-  const deduped = [...new Set(source.map((s) => s.toLowerCase()))];
+  const deduped = Array.from(new Set(source.map((s) => s.toLowerCase())));
   return deduped.slice(0, MAX_SUGGESTIONS);
 }
 
