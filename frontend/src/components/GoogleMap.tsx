@@ -102,7 +102,15 @@ export function GoogleMap({ position, height = "320px", apiKey }: Props) {
 
   if (scriptError) {
     return (
-      <div style={{ padding: "1rem", background: "#fef2f2", borderRadius: 8, color: "#c04040", fontSize: "0.875rem" }}>
+      <div
+        style={{
+          padding: "1rem",
+          background: "var(--wl-error-bg)",
+          borderRadius: 8,
+          color: "var(--wl-error)",
+          fontSize: "0.875rem",
+        }}
+      >
         {scriptError}
       </div>
     );
@@ -116,7 +124,7 @@ export function GoogleMap({ position, height = "320px", apiKey }: Props) {
         height,
         borderRadius: 12,
         overflow: "hidden",
-        background: "#e8e4e0",
+        background: "var(--wl-bg-cream-dark)",
       }}
       aria-hidden
     />

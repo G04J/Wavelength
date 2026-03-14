@@ -34,32 +34,36 @@ function createDefaultSectionData(): SectionData {
 const styles = {
   page: {
     minHeight: "100vh",
-    background: "#fdf8f6",
+    backgroundImage: "url('/user-profile-bg.jpeg')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
     fontFamily: "'Plus Jakarta Sans', sans-serif",
     padding: "2rem",
     position: "relative" as const,
-    overflow: "hidden",
+    overflow: "visible",
   },
   nav: {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: "2rem",
+    marginBottom: "1.25rem",
     flexWrap: "wrap" as const,
-    gap: "1rem",
-    padding: "0.85rem 1.25rem",
+    gap: "0.75rem",
+    padding: "0.35rem 1rem",
     borderRadius: 999,
-    border: "1px solid rgba(220,180,180,0.35)",
-    background: "rgba(253,248,246,0.9)",
+    border: "1px solid var(--wl-border-subtle)",
+    background: "var(--wl-bg-nav)",
     backdropFilter: "blur(10px)",
     position: "relative" as const,
     zIndex: 2,
+    overflow: "visible",
   },
   title: {
     fontFamily: "'Playfair Display', serif",
     fontSize: "1.5rem",
     fontWeight: 700,
-    color: "#3a1a1a",
+    color: "var(--wl-text)",
   },
   cardWrap: {
     display: "flex",
@@ -73,19 +77,19 @@ const styles = {
     maxWidth: 640,
     background: "#ffffff",
     borderRadius: 20,
-    boxShadow: "0 16px 60px rgba(224, 96, 96, 0.14)",
+    boxShadow: "0 16px 60px var(--wl-accent-shadow-strong)",
     padding: "2.25rem 2rem 2rem",
-    border: "1px solid rgba(240, 210, 205, 0.9)",
+    border: "1px solid var(--wl-border)",
     position: "relative" as const,
     overflow: "hidden",
   },
   subtitle: {
     fontSize: "0.875rem",
-    color: "#b08080",
+    color: "var(--wl-text-muted)",
     marginTop: "0.5rem",
   },
   link: {
-    color: "#e06060",
+    color: "var(--wl-accent)",
     textDecoration: "none",
     fontSize: "0.875rem",
     fontWeight: 500,
@@ -93,9 +97,9 @@ const styles = {
   signOut: {
     padding: "0.5rem 1rem",
     borderRadius: 8,
-    border: "1px solid #f0e0dc",
-    background: "white",
-    color: "#b08080",
+    border: "1px solid var(--wl-border)",
+    background: "var(--wl-bg-card)",
+    color: "var(--wl-text-muted)",
     fontSize: "0.875rem",
     cursor: "pointer",
     fontFamily: "inherit",
@@ -110,14 +114,14 @@ const styles = {
     display: "block",
     fontSize: "0.875rem",
     fontWeight: 600,
-    color: "#3a1a1a",
+    color: "var(--wl-text)",
     marginBottom: "0.375rem",
   },
   input: {
     width: "100%",
     padding: "0.75rem 1rem",
     borderRadius: 10,
-    border: "1px solid #f0e0dc",
+    border: "1px solid var(--wl-border)",
     fontSize: "1rem",
     boxSizing: "border-box" as const,
   },
@@ -131,17 +135,17 @@ const styles = {
     fontFamily: "inherit",
   },
   buttonPrimary: {
-    background: "#e06060",
-    color: "white",
+    background: "var(--wl-accent)",
+    color: "var(--wl-text-on-accent)",
   },
   buttonSecondary: {
-    background: "#f5e6e6",
+    background: "var(--wl-accent-soft)",
     color: "#7a4545",
   },
   backLink: {
     display: "inline-block",
     fontSize: "0.875rem",
-    color: "#e06060",
+    color: "var(--wl-accent)",
     marginBottom: "1rem",
     cursor: "pointer",
     background: "none",
@@ -151,12 +155,12 @@ const styles = {
   },
   error: {
     fontSize: "0.875rem",
-    color: "#c04040",
+    color: "var(--wl-error)",
     marginTop: "0.5rem",
   },
   success: {
     fontSize: "0.875rem",
-    color: "#2d7a2d",
+    color: "var(--wl-success)",
     marginTop: "0.5rem",
   },
   profileHeader: {
@@ -173,12 +177,12 @@ const styles = {
     fontWeight: 600,
     textTransform: "uppercase" as const,
     letterSpacing: "0.06em",
-    color: "#b08080",
+    color: "var(--wl-text-muted)",
     marginBottom: "0.125rem",
   },
   profileValue: {
     fontSize: "0.95rem",
-    color: "#3a1a1a",
+    color: "var(--wl-text)",
   },
   interestGroup: {
     marginTop: "1rem",
@@ -193,7 +197,7 @@ const styles = {
   interestGroupTitle: {
     fontSize: "0.9rem",
     fontWeight: 600,
-    color: "#3a1a1a",
+    color: "var(--wl-text)",
   },
   interestTags: {
     display: "flex",
@@ -203,13 +207,13 @@ const styles = {
   interestTag: {
     padding: "0.3rem 0.75rem",
     borderRadius: 999,
-    background: "rgba(224, 96, 96, 0.08)",
+    background: "var(--wl-bg-tag)",
     color: "#5a3a3a",
     fontSize: "0.8rem",
   },
   interestEmpty: {
     fontSize: "0.8rem",
-    color: "#b08080",
+    color: "var(--wl-text-muted)",
     fontStyle: "italic",
   },
   buttonRow: {
@@ -225,18 +229,18 @@ const styles = {
     gap: "0.75rem",
     marginBottom: "1.5rem",
     fontSize: "0.75rem",
-    color: "#b08080",
+    color: "var(--wl-text-muted)",
   },
   pill: {
     padding: "0.25rem 0.7rem",
     borderRadius: 999,
     background: "rgba(255,255,255,0.75)",
-    border: "1px solid rgba(240,210,205,0.9)",
+    border: "1px solid var(--wl-border)",
     fontSize: "0.72rem",
     fontWeight: 600,
     textTransform: "uppercase" as const,
     letterSpacing: "0.12em",
-    color: "#e08080",
+    color: "var(--wl-accent-light)",
   },
   stepperTrack: {
     flex: 1,
@@ -249,16 +253,16 @@ const styles = {
     width: 9,
     height: 9,
     borderRadius: "50%",
-    background: "rgba(230, 140, 140, 0.45)",
+    background: "var(--wl-bg-tag-strong)",
   },
   stepDotActive: {
-    background: "#e06060",
-    boxShadow: "0 0 0 6px rgba(224,96,96,0.18)",
+    background: "var(--wl-accent)",
+    boxShadow: "0 0 0 6px var(--wl-accent-glow)",
   },
   stepLabel: {
     fontSize: "0.75rem",
     fontWeight: 600,
-    color: "#b08080",
+    color: "var(--wl-text-muted)",
   },
   backgroundBlob: {
     position: "absolute" as const,
@@ -270,8 +274,8 @@ const styles = {
   },
   interestDropdown: {
     borderRadius: 12,
-    border: "1px solid #f0e0dc",
-    background: "#fffaf8",
+    border: "1px solid var(--wl-border)",
+    background: "rgba(255,255,255,0.88)",
     padding: "0.35rem 0.85rem 0.7rem",
     marginBottom: "0.75rem",
   },
@@ -290,7 +294,7 @@ const styles = {
   },
   interestDropdownHint: {
     fontSize: "0.78rem",
-    color: "#b08080",
+    color: "var(--wl-text-muted)",
   },
 };
 
@@ -547,8 +551,12 @@ export default function ProfilePage() {
         />
 
         <nav style={styles.nav}>
-          <Link href="/" style={{ ...styles.link, fontWeight: 600 }}>
-            wave~length
+          <Link href="/" style={{ display: "inline-flex", alignItems: "center" }}>
+            <img
+              src="/logo.png"
+              alt="Wavelength"
+              style={{ height: 48, width: "auto", display: "block", verticalAlign: "middle" }}
+            />
           </Link>
         </nav>
         <div style={styles.cardWrap}>
@@ -594,8 +602,12 @@ export default function ProfilePage() {
         />
 
         <nav style={styles.nav}>
-          <Link href="/" style={{ ...styles.link, fontWeight: 600 }}>
-            wave~length
+          <Link href="/" style={{ display: "inline-flex", alignItems: "center" }}>
+            <img
+              src="/logo.png"
+              alt="Wavelength"
+              style={{ height: 48, width: "auto", display: "block", verticalAlign: "middle" }}
+            />
           </Link>
         </nav>
         <div style={styles.cardWrap}>
@@ -656,8 +668,12 @@ export default function ProfilePage() {
       />
 
       <nav style={styles.nav}>
-        <Link href="/" style={{ ...styles.link, fontWeight: 600 }}>
-          wave~length
+        <Link href="/" style={{ display: "inline-flex", alignItems: "center" }}>
+          <img
+            src="/logo.png"
+            alt="Wavelength"
+            style={{ height: 48, width: "auto", display: "block", verticalAlign: "middle" }}
+          />
         </Link>
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
           <Link href="/map" style={styles.link}>
@@ -705,7 +721,7 @@ export default function ProfilePage() {
                     <span style={styles.stepLabel}>Basics</span>
                   </div>
                 </div>
-                <div style={{ height: 1, flex: 1, background: "rgba(224, 96, 96, 0.18)" }} />
+                <div style={{ height: 1, flex: 1, background: "var(--wl-accent-glow)" }} />
                 <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                   <div
                     style={{

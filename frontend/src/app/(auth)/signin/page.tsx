@@ -9,40 +9,61 @@ import { getAuthErrorMessage } from "@/utils/authErrors";
 const styles = {
   page: {
     minHeight: "100vh",
-    background: "#fdf8f6",
+    background: "var(--wl-bg-cream)",
     fontFamily: "'Plus Jakarta Sans', sans-serif",
+    position: "relative" as const,
+    overflow: "hidden",
+  },
+  topImage: {
+    position: "absolute" as const,
+    top: 0,
+    left: 0,
+    right: 0,
+    height: "60vh",
+    minHeight: 420,
+    backgroundImage: "url('/profile-bg.png')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+    zIndex: 0,
+  },
+  content: {
+    minHeight: "100vh",
     display: "flex",
-    flexDirection: "column" as const,
     alignItems: "center",
     justifyContent: "center",
     padding: "2rem",
+    position: "relative" as const,
+    zIndex: 1,
   },
   card: {
     width: "100%",
     maxWidth: 400,
-    background: "white",
+    background: "rgba(255,255,255,0.9)",
     borderRadius: 16,
-    boxShadow: "0 4px 24px rgba(224, 96, 96, 0.08)",
+    boxShadow:
+      "0 0 0 1px rgba(255,255,255,0.9), 0 18px 60px rgba(255,255,255,0.35), 0 10px 36px var(--wl-accent-shadow)",
     padding: "2rem",
-    border: "1px solid #f0e0dc",
+    border: "1px solid var(--wl-border)",
+    backdropFilter: "blur(10px)",
   },
   title: {
     fontFamily: "'Playfair Display', serif",
     fontSize: "1.5rem",
     fontWeight: 700,
-    color: "#3a1a1a",
+    color: "var(--wl-text)",
     marginBottom: "0.5rem",
   },
   subtitle: {
     fontSize: "0.875rem",
-    color: "#b08080",
+    color: "var(--wl-text-muted)",
     marginBottom: "1.5rem",
   },
   input: {
     width: "100%",
     padding: "0.75rem 1rem",
     borderRadius: 10,
-    border: "1px solid #f0e0dc",
+    border: "1px solid var(--wl-border)",
     fontSize: "1rem",
     marginBottom: "1rem",
     boxSizing: "border-box" as const,
@@ -55,12 +76,12 @@ const styles = {
     fontSize: "1rem",
     fontWeight: 600,
     cursor: "pointer",
-    background: "#e06060",
-    color: "white",
+    background: "var(--wl-accent)",
+    color: "var(--wl-text-on-accent)",
     marginTop: "0.5rem",
   },
   link: {
-    color: "#e06060",
+    color: "var(--wl-accent)",
     textDecoration: "none",
     fontSize: "0.875rem",
     marginTop: "1rem",
@@ -68,7 +89,7 @@ const styles = {
   },
   error: {
     fontSize: "0.875rem",
-    color: "#c04040",
+    color: "var(--wl-error)",
     marginBottom: "1rem",
   },
 };
@@ -142,9 +163,12 @@ export default function SignInPage() {
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
         rel="stylesheet"
       />
-      <Suspense fallback={<div style={styles.page}>Loading…</div>}>
-        <SignInForm />
-      </Suspense>
+      <div style={styles.topImage} aria-hidden />
+      <div style={styles.content}>
+        <Suspense fallback={<div style={styles.content}>Loading…</div>}>
+          <SignInForm />
+        </Suspense>
+      </div>
     </div>
   );
 }

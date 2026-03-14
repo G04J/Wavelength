@@ -2,8 +2,51 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Color scheme from user-profile-bg.jpeg (glowing windows, warm neutrals) + profile-bg.png (greens, sunset, earthy) */
+:root {
+  /* Backgrounds */
+  --wl-bg-cream: #fbf6f0;
+  --wl-bg-cream-dark: #f2e9df;
+  --wl-bg-card: #ffffff;
+  --wl-bg-nav: rgba(251, 246, 240, 0.86);
+  --wl-bg-tag: rgba(255, 45, 107, 0.12);
+  --wl-bg-tag-strong: rgba(255, 45, 107, 0.18);
+  /* Primary accent (pop pink) */
+  --wl-accent: #ff2d6b;
+  --wl-accent-light: #ff5a8a;
+  --wl-accent-soft: #ffe0ea;
+  --wl-accent-glow: rgba(255, 45, 107, 0.28);
+  --wl-accent-shadow: rgba(255, 45, 107, 0.18);
+  --wl-accent-shadow-strong: rgba(255, 45, 107, 0.24);
+  /* Secondary accent (cool window glow) */
+  --wl-accent-cool: #35b8c8;
+  --wl-accent-cool-soft: rgba(53, 184, 200, 0.16);
+  /* Text */
+  --wl-text: #241515;
+  --wl-text-muted: #7a5b55;
+  --wl-text-on-accent: #ffffff;
+  /* Blobs / decorative (building windows + collage) */
+  --wl-blob-blush: #ff5aa5;
+  --wl-blob-peach: #ffb36b;
+  --wl-blob-mauve: #8b6cff;
+  --wl-blob-amber: #ffd24a;
+  /* Borders & surfaces */
+  --wl-border: #ead8d0;
+  --wl-border-subtle: rgba(150, 95, 95, 0.26);
+  /* Semantic */
+  --wl-error: #c43b3b;
+  --wl-error-bg: #fff0f2;
+  --wl-success: #2d7a2d;
+  /* Bottom wave fills */
+  --wl-wave-1: #ffe7d6;
+  --wl-wave-2: #ffd0d8;
+  --wl-wave-3: #c9f0f6;
+}
+
 @layer base {
   body {
-    @apply bg-cream text-gray-800 antialiased;
+    @apply antialiased;
+    background-color: var(--wl-bg-cream);
+    color: var(--wl-text);
   }
 }

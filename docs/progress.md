@@ -115,4 +115,4 @@ Track implementation steps here. Update this file after every meaningful change.
 
 ---
 
-*Last updated: Landing page hero now uses soft white glow shadows over the map background so text and CTA pop without feeling heavy.*
+*Last updated: Softened landing-page top-right pink cloud blob for a gentler hero background.*
