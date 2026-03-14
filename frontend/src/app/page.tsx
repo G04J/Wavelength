@@ -21,6 +21,6 @@ import LandingScreen from "@/components/LandingScreen"
 
 export default function Home() {
   const router = useRouter()
-  return <LandingScreen onEnter={() => router.push("/map")} />
+  return <LandingScreen onEnter={() => router.push("/signin")} />
 }
 
