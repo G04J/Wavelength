@@ -35,10 +35,13 @@ const waves = [
 
 export default function LandingScreen({ onEnter }: { onEnter: () => void }) {
   return (
-    <div style={{
+      <div style={{
       width: "100%",
       minHeight: "100vh",
-      background: "#fdf8f6",
+      backgroundImage: "url('/map-bg.png')",
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      backgroundRepeat: "no-repeat",
       fontFamily: "'Plus Jakarta Sans', sans-serif",
       position: "relative",
       overflow: "hidden",
@@ -119,7 +122,7 @@ export default function LandingScreen({ onEnter }: { onEnter: () => void }) {
       <div style={{ display:"flex", flexDirection:"column", alignItems:"center", padding:"4rem 2rem 2.5rem", textAlign:"center", position:"relative", zIndex:2 }}>
         <motion.div
           initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.1, duration:0.5 }}
-          style={{ display:"flex", alignItems:"center", gap:6, marginBottom:"1rem" }}
+          style={{ display:"flex", alignItems:"center", gap:6, marginBottom:"1rem", textShadow:"0 0 10px rgba(255,255,255,0.85)" }}
         >
           <div style={{ width:6, height:6, borderRadius:"50%", background:"#e08080" }}/>
           <span style={{ fontSize:"0.68rem", letterSpacing:"0.15em", textTransform:"uppercase", color:"#e08080", fontWeight:600 }}>
@@ -129,7 +132,7 @@ export default function LandingScreen({ onEnter }: { onEnter: () => void }) {
 
         <motion.h1
           initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.2, duration:0.6 }}
-          style={{ fontFamily:"'Playfair Display', serif", fontSize:"clamp(2.4rem, 5vw, 3.8rem)", fontWeight:700, color:"#3a1a1a", lineHeight:1.1, marginBottom:"1rem", maxWidth:580 }}
+          style={{ fontFamily:"'Playfair Display', serif", fontSize:"clamp(2.4rem, 5vw, 3.8rem)", fontWeight:700, color:"#3a1a1a", lineHeight:1.1, marginBottom:"1rem", maxWidth:580, textShadow:"0 0 26px rgba(255,255,255,0.95)" }}
         >
           your people are closer<br />
           than <em style={{ fontStyle:"italic", color:"#e06060" }}>you think.</em>
@@ -137,7 +140,7 @@ export default function LandingScreen({ onEnter }: { onEnter: () => void }) {
 
         <motion.p
           initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay:0.35, duration:0.5 }}
-          style={{ fontSize:"0.88rem", color:"#b08080", lineHeight:1.8, maxWidth:260, marginBottom:"2rem" }}
+          style={{ fontSize:"0.88rem", color:"#b08080", lineHeight:1.8, maxWidth:260, marginBottom:"2rem", textShadow:"0 0 18px rgba(255,255,255,0.9)" }}
         >
           find them nearby, anonymously.
         </motion.p>
@@ -146,7 +149,7 @@ export default function LandingScreen({ onEnter }: { onEnter: () => void }) {
           initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.45, duration:0.4 }}
           whileHover={{ scale:1.04 }} whileTap={{ scale:0.97 }}
           onClick={onEnter}
-          style={{ background:"#e06060", color:"#ffffff", border:"none", borderRadius:"999px", padding:"12px 32px", fontSize:"0.85rem", fontWeight:600, cursor:"pointer", fontFamily:"'Plus Jakarta Sans', sans-serif", boxShadow:"0 4px 24px rgba(224,96,96,0.25)" }}
+          style={{ background:"#e06060", color:"#ffffff", border:"none", borderRadius:"999px", padding:"12px 32px", fontSize:"0.85rem", fontWeight:600, cursor:"pointer", fontFamily:"'Plus Jakarta Sans', sans-serif", boxShadow:"0 0 26px rgba(255,255,255,0.9)" }}
         >
           find my wavelength →
         </motion.button>

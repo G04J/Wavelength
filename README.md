@@ -22,7 +22,12 @@ npm install
 cp .env.example .env         # optional: edit with your values
 ```
 
-Env files are only needed once you add Elasticsearch, Groq, etc. See `frontend/.env.example` and `backend/.env.example` for variables.
+**Auth (Supabase):** Create a project at [supabase.com](https://supabase.com). In Authentication → Providers enable Email and Google (add Google OAuth credentials from Google Cloud Console). Then:
+
+- **Frontend** `.env.local`: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_WS_URL` (backend URL for API/WS).
+- **Backend** `.env`: `SUPABASE_JWT_SECRET` (Project Settings → API → JWT Secret), `PORT`, `FRONTEND_ORIGIN`.
+
+Copy from each `.env.example`; never commit real secrets. Other vars (Elasticsearch, Groq) are needed when you add those features.
 
 ---
 
