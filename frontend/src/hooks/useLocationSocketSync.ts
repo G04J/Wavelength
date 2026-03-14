@@ -45,7 +45,11 @@ export function useLocationSocketSync() {
   // Emit each position update on the same socket
   useEffect(() => {
     if (status === "watching" && position && socketRef.current) {
-      socketRef.current.emit("location", { lat: position.lat, lng: position.lng });
+      socketRef.current.emit("location", { 
+      lat: position.lat, 
+      lng: position.lng,
+      userId: userIdRef.current, 
+    })
       console.log("[Socket] emit location", { lat: position.lat.toFixed(4), lng: position.lng.toFixed(4) });
     }
   }, [status, position?.lat, position?.lng]);
