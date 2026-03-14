@@ -349,7 +349,7 @@ export default function HowItWorksPage() {
               boxShadow: "0 4px 20px rgba(192,57,43,0.25)",
             }}
           >
-            Back to map →
+            Back to map
           </Link>
         </div>
       </div>
