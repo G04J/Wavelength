@@ -9,6 +9,7 @@ const WS_URL = process.env.NEXT_PUBLIC_WS_URL ?? "http://localhost:3001";
 
 export function useLocationSocketSync() {
   const { position, status } = useLiveLocation();
+  console.log("[Socket] status:", status, "position:", position)
   const socketRef = useRef<Socket | null>(null);
 
   // Keep one socket while watching; disconnect when no longer watching
