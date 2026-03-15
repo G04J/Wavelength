@@ -9,34 +9,48 @@ const WS_URL = process.env.NEXT_PUBLIC_WS_URL ?? "http://localhost:3001";
 
 export function useLocationSocketSync() {
   const { position, status } = useLiveLocation();
-  const socketRef = useRef<Socket | null>(null);
+  const [socket, setSocket] = useState<Socket | null>(null);
   const [nearbyUsersRaw, setNearbyUsersRaw] = useState<any[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
+  const userIdRef = useRef<string | null>(null);
+  userIdRef.current = userId;
 
-  // Resolve userId once from Supabase
+  // Subscribe to Supabase auth so we get userId when logged in (and updates across tabs)
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user?.id) setUserId(data.user.id);
+    const setUser = () => {
+      supabase.auth.getUser().then(({ data }) => {
+        const id = data.user?.id ?? null;
+        setUserId(id);
+      });
+    };
+    setUser();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      setUser();
     });
+    return () => subscription.unsubscribe();
   }, []);
 
-  // Single socket — connects when watching, disconnects when not
+  // Single socket — create only when status is "watching"; do NOT depend on userId so we don't recreate socket
   useEffect(() => {
     if (status !== "watching") {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-        socketRef.current = null;
+      if (socket) {
+        socket.disconnect();
+        setSocket(null);
       }
       return;
     }
 
     const s = io(WS_URL, { transports: ["websocket"] });
-    socketRef.current = s;
+    setSocket(s);
 
     s.on("connect", () => {
       console.log("[Socket] connected", s.id);
-      if (userId) s.emit("register", { userId });
+      const uid = userIdRef.current;
+      if (uid) {
+        s.emit("register", { userId: uid });
+        console.log("[Socket] registered", uid);
+      }
     });
 
     s.on("disconnect", (reason) =>
@@ -44,35 +58,34 @@ export function useLocationSocketSync() {
     );
 
     s.on("nearby_users", (payload: any[]) => {
-      console.log("[Socket] nearby_users received:", payload?.length, "users");
       setNearbyUsersRaw(payload ?? []);
     });
 
     return () => {
       s.disconnect();
-      socketRef.current = null;
+      setSocket(null);
     };
-  }, [status, userId]);
+  }, [status]);
 
-  // Re-register if userId arrives after socket connected
+  // Re-register whenever userId becomes available (e.g. after Supabase auth resolves)
   useEffect(() => {
-    if (userId && socketRef.current?.connected) {
-      socketRef.current.emit("register", { userId });
-    }
-  }, [userId]);
+    if (!userId || !socket?.connected) return;
+    socket.emit("register", { userId });
+    console.log("[Socket] register (userId ready)", userId);
+  }, [userId, socket]);
 
-  // Emit location when position changes
+  // Emit location when position changes (same userId so backend and chat routing match)
   useEffect(() => {
-    if (status !== "watching" || !position || !socketRef.current || !userId) return;
-    socketRef.current.emit("location", {
+    if (status !== "watching" || !position || !socket || !userId) return;
+    socket.emit("location", {
       lat: Number(position.lat),
       lng: Number(position.lng),
       userId,
     });
-  }, [status, position?.lat, position?.lng, userId]);
+  }, [status, position?.lat, position?.lng, userId, socket]);
 
   return {
-    socket: socketRef.current,
+    socket,
     nearbyUsersRaw,
     userId,
   };
