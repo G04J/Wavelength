@@ -89,15 +89,6 @@ Shared interests are computed by comparing your interest tags against each nearb
 | AI | Groq LLaMA 3.3 70B |
 | Search | Elasticsearch on Elastic Cloud |
 | Auth + DB | Supabase |
-| Hosting | Vercel (frontend), Railway (backend) |
-
----
-
-## Repo structure
-
-- `frontend/` Next.js app. Deployed to Vercel.
-- `backend/` Express + Socket.io server. Deployed to Railway.
-- `supabase/` Database migrations and schema.
 
 ---
 
