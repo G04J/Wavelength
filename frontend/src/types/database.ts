@@ -4,6 +4,9 @@ export type Profile = {
   name: string;
   age: number | null;
   email: string;
+  facebook_url?: string | null;
+  instagram_handle?: string | null;
+  show_social_to_nearby?: boolean;
   created_at?: string;
   updated_at?: string;
 };

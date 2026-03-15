@@ -305,9 +305,17 @@ export default function ProfilePage() {
   const [email, setEmail] = useState("");
   const [sectionData, setSectionData] = useState<SectionData>(() => createDefaultSectionData());
   const [mode, setMode] = useState<ProfileMode>("setup-basics");
-  const [initialProfile, setInitialProfile] = useState<{ name: string; age: string; email: string } | null>(
-    null
-  );
+  const [initialProfile, setInitialProfile] = useState<{
+    name: string;
+    age: string;
+    email: string;
+    facebook_url: string;
+    instagram_handle: string;
+    show_social_to_nearby: boolean;
+  } | null>(null);
+  const [facebookUrl, setFacebookUrl] = useState("");
+  const [instagramHandle, setInstagramHandle] = useState("");
+  const [showSocialToNearby, setShowSocialToNearby] = useState(false);
   const [initialSectionData, setInitialSectionData] = useState<SectionData>(() => createDefaultSectionData());
   const [step1Error, setStep1Error] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -334,7 +342,7 @@ export default function ProfilePage() {
 
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("name, age, email")
+      .select("name, age, email, facebook_url, instagram_handle, show_social_to_nearby")
       .eq("id", user.id)
       .maybeSingle();
 
@@ -348,10 +356,23 @@ export default function ProfilePage() {
       const nextName = profile.name ?? "";
       const nextAge = profile.age != null ? String(profile.age) : "";
       const nextEmail = profile.email ?? user.email ?? "";
+      const nextFb = (profile as { facebook_url?: string | null }).facebook_url ?? "";
+      const nextIg = (profile as { instagram_handle?: string | null }).instagram_handle ?? "";
+      const nextShow = (profile as { show_social_to_nearby?: boolean }).show_social_to_nearby ?? false;
       setName(nextName);
       setAge(nextAge);
       setEmail(nextEmail);
-      setInitialProfile({ name: nextName, age: nextAge, email: nextEmail });
+      setFacebookUrl(nextFb);
+      setInstagramHandle(nextIg);
+      setShowSocialToNearby(nextShow);
+      setInitialProfile({
+        name: nextName,
+        age: nextAge,
+        email: nextEmail,
+        facebook_url: nextFb,
+        instagram_handle: nextIg,
+        show_social_to_nearby: nextShow,
+      });
     }
 
     const { data: interestRows, error: interestsError } = await supabase
@@ -449,6 +470,9 @@ export default function ProfilePage() {
       name: nameTrim,
       email: emailTrim,
       age: ageNum ?? null,
+      facebook_url: facebookUrl.trim() || null,
+      instagram_handle: instagramHandle.trim() || null,
+      show_social_to_nearby: showSocialToNearby,
       sectionData: {
         music: sectionData.music ?? [],
         tv: sectionData.tv ?? [],
@@ -478,6 +502,9 @@ export default function ProfilePage() {
       name: nameTrim,
       age: ageNum != null ? String(ageNum) : "",
       email: emailTrim,
+      facebook_url: facebookUrl.trim(),
+      instagram_handle: instagramHandle.trim(),
+      show_social_to_nearby: showSocialToNearby,
     });
     setInitialSectionData({
       music: sectionData.music ?? [],
@@ -504,6 +531,9 @@ export default function ProfilePage() {
       setName(initialProfile.name);
       setAge(initialProfile.age);
       setEmail(initialProfile.email);
+      setFacebookUrl(initialProfile.facebook_url ?? "");
+      setInstagramHandle(initialProfile.instagram_handle ?? "");
+      setShowSocialToNearby(initialProfile.show_social_to_nearby ?? false);
     }
     setError(null);
     setStep1Error(null);
@@ -827,6 +857,44 @@ export default function ProfilePage() {
                       autoComplete="email"
                     />
                   </div>
+                  <div>
+                    <label htmlFor="facebook_url" style={styles.label}>
+                      Facebook (profile URL or page name)
+                    </label>
+                    <input
+                      id="facebook_url"
+                      type="text"
+                      value={facebookUrl}
+                      onChange={(e) => setFacebookUrl(e.target.value)}
+                      placeholder="https://facebook.com/yourpage or your page name"
+                      style={styles.input}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="instagram_handle" style={styles.label}>
+                      Instagram (username)
+                    </label>
+                    <input
+                      id="instagram_handle"
+                      type="text"
+                      value={instagramHandle}
+                      onChange={(e) => setInstagramHandle(e.target.value)}
+                      placeholder="username without @"
+                      style={styles.input}
+                    />
+                  </div>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                    <input
+                      id="show_social_to_nearby"
+                      type="checkbox"
+                      checked={showSocialToNearby}
+                      onChange={(e) => setShowSocialToNearby(e.target.checked)}
+                      style={{ marginTop: 4 }}
+                    />
+                    <label htmlFor="show_social_to_nearby" style={{ ...styles.label, marginBottom: 0, fontWeight: 500 }}>
+                      Show my social links to people who find me on the map
+                    </label>
+                  </div>
                   {step1Error && <p style={styles.error}>{step1Error}</p>}
 
                   {mode === "setup-basics" && (
@@ -951,6 +1019,18 @@ export default function ProfilePage() {
                   <div style={styles.profileRow}>
                     <div style={styles.profileLabel}>Email</div>
                     <div style={styles.profileValue}>{email || "—"}</div>
+                  </div>
+                  <div style={styles.profileRow}>
+                    <div style={styles.profileLabel}>Facebook</div>
+                    <div style={styles.profileValue}>{facebookUrl ? (facebookUrl.startsWith("http") ? facebookUrl : `https://facebook.com/${facebookUrl}`) : "—"}</div>
+                  </div>
+                  <div style={styles.profileRow}>
+                    <div style={styles.profileLabel}>Instagram</div>
+                    <div style={styles.profileValue}>{instagramHandle ? `@${instagramHandle}` : "—"}</div>
+                  </div>
+                  <div style={styles.profileRow}>
+                    <div style={styles.profileLabel}>Show social links on map</div>
+                    <div style={styles.profileValue}>{showSocialToNearby ? "Yes" : "No"}</div>
                   </div>
                 </div>
 

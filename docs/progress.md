@@ -44,6 +44,7 @@ Track implementation steps here. Update this file after every meaningful change.
 - [x] Interest suggestions via `POST /api/profile/suggestions` (Groq, server-side); createDefaultSectionData() factory
 - [x] Profile flow: first-time setup (step 1 = name, age, email → step 2 = interests + Save)
 - [x] Returning-user profile UX: read-only display with separate Edit basics / Edit interests views
+- [x] Profile basics: optional Facebook URL, Instagram handle, “Show my social links to people who find me on the map” (checkbox); migration `20250315000000_profiles_social_links.sql`
 - [ ] Groq LLaMA 3.3 70B drill-down: multi-level interests (e.g. Anime → Attack on Titan)
 - [ ] Save profile → backend; Groq 20D cultural vector; index in Elasticsearch (uses `userId` from Supabase JWT)
 
@@ -117,4 +118,4 @@ Track implementation steps here. Update this file after every meaningful change.
 
 ---
 
-*Last updated: Removed 7 fallback users; map shows only real nearby users from backend.*
+*Last updated: Chat removed; profile social links (Facebook, Instagram) + permission checkbox; heart popup shows social icons when permitted.*

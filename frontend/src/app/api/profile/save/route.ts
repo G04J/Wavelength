@@ -17,6 +17,9 @@ type Body = {
   age?: unknown;
   email?: unknown;
   sectionData?: unknown;
+  facebook_url?: unknown;
+  instagram_handle?: unknown;
+  show_social_to_nearby?: unknown;
 };
 
 /**
@@ -102,6 +105,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Email is required" }, { status: 400 });
   }
 
+  const facebook_url = typeof body.facebook_url === "string" ? body.facebook_url.trim() || null : null;
+  const instagram_handle = typeof body.instagram_handle === "string" ? body.instagram_handle.trim() || null : null;
+  const show_social_to_nearby = body.show_social_to_nearby === true || body.show_social_to_nearby === "true";
+
   const safeSectionData = validateAndSanitizeSectionData(body.sectionData);
   const { allTags, profileText } = buildAllTagsAndProfileText(safeSectionData);
 
@@ -112,6 +119,9 @@ export async function POST(request: Request) {
       name,
       email,
       age,
+      facebook_url,
+      instagram_handle,
+      show_social_to_nearby,
     },
     { onConflict: "id" }
   );
