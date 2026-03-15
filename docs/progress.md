@@ -61,15 +61,15 @@ Track implementation steps here. Update this file after every meaningful change.
 ## 5. Discover map
 
 - [x] Google Maps JavaScript API: map + “You” marker for live position (optional; set `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`)
-- [ ] Leaflet map option / light/stylised base layer
-- [ ] Your position: single glowing dot (anon, no exact location)
-- [ ] Heart markers for nearby people; darker = higher match
-- [ ] Red arc lines from you to each heart
+- [x] Leaflet map: light base layer, "You" teal dot at live position (or fallback center), 2 km ring
+- [x] Your position: single glowing dot; map center and you marker use live position when available
+- [x] Heart markers for nearby people (backend `nearby_users` only; no fallback list); darker = higher match
+- [x] Red arc lines (threads) from you to each heart
   - *3D animated hearts (gradient, glow, heartbeat + float keyframes); red threads same thickness for all, in overlayPane so visible.*
-- [ ] Labels: “X% wavelength”
-- [ ] Left panel: “Find your people nearby.”, live count, quote
+- [x] Labels: “X% wavelength”
+- [ ] Left panel: “Find your people nearby.”, live count, Matching radius 2 km
 - [ ] Compatibility range slider (e.g. 40–95%), “Show Matches” button
-- [ ] Click heart → profile popup: compatibility %, shared interests, Connect/Chat button
+- [x] Click heart → profile popup: compatibility %, shared interests, Connect/Chat button
 - [x] “How it works” link from map → dedicated page (/how-it-works) with steps; cream/red theme, Plus Jakarta Sans
 
 ---
@@ -77,10 +77,10 @@ Track implementation steps here. Update this file after every meaningful change.
 ## 6. Geolocation & real-time
 
 - [x] navigator.geolocation (watchPosition) via LocationContext + useLiveLocation; enable on Discover
-- [x] Backend: Socket.io `location` event; store last position per socket in memory (for future nearby query)
-- [x] Frontend: useLocationSocketSync streams live position to backend while on Discover
-- [ ] Backend: nearby query within 2 km, no exact location exposed
-- [ ] Server pushes match updates to client
+- [x] Backend: Socket.io `location` event; index position in Elasticsearch; 2 km geo_distance query; emit `nearby_users` to client
+- [x] Frontend: useLocationSocketSync streams live position to backend while on Discover (Supabase userId); MapsScreen also emits `location` on its socket (anon userId) and listens for `nearby_users`
+- [x] Backend: nearby query within 2 km, no exact location exposed (hits return userId + location for map only)
+- [x] Server pushes nearby_users to client; map shows only real nearby users (no dev fallback)
 
 ---
 
@@ -117,5 +117,4 @@ Track implementation steps here. Update this file after every meaningful change.
 
 ---
 
-*Last updated: after adding How it works page (/how-it-works) linked from map.*
-*Last updated: Softened landing-page top-right pink cloud blob for a gentler hero background.*
+*Last updated: Removed 7 fallback users; map shows only real nearby users from backend.*

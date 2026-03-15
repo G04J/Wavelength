@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import { io, Socket } from "socket.io-client";
+import { useLiveLocation } from "@/contexts/LocationContext";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -41,17 +42,6 @@ type AcceptedConvo = {
 
 // ─── HARDCODED CENTER (Sydney CBD) ───────────────────────────────────────────
 const HARDCODED_CENTER = { lat: -33.8688, lng: 151.2093 };
-
-// ─── HARDCODED NEARBY USERS — spread across ~2 km radius ────────────────────
-const HARDCODED_USERS: NearbyUser[] = [
-  { uid: "user-1", similarity: 0.88, lat: -33.8565, lng: 151.2050, sharedInterests: ["Radiohead", "Elden Ring", "Succession"], name: "Alex" },
-  { uid: "user-2", similarity: 0.72, lat: -33.8720, lng: 151.1900, sharedInterests: ["Bon Iver", "Hollow Knight", "The Bear"], name: "Jordan" },
-  { uid: "user-3", similarity: 0.81, lat: -33.8580, lng: 151.2240, sharedInterests: ["Frank Ocean", "Disco Elysium", "Fleabag"], name: "Sam" },
-  { uid: "user-4", similarity: 0.10, lat: -33.8830, lng: 151.2180, sharedInterests: ["Tame Impala", "Stardew Valley", "Atlanta"], name: "Riley" },
-  { uid: "user-5", similarity: 0.69, lat: -33.8650, lng: 151.1950, sharedInterests: ["Mitski", "Hades", "Severance"], name: "Mika" },
-  { uid: "user-6", similarity: 0.46, lat: -33.8810, lng: 151.1980, sharedInterests: ["James Blake", "Celeste", "Skins"], name: "Quinn" },
-  { uid: "user-7", similarity: 0.63, lat: -33.8770, lng: 151.2230, sharedInterests: ["FKA Twigs", "Outer Wilds", "Twin Peaks"], name: "Dana" },
-];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -500,6 +490,8 @@ function Toast({ message, onDismiss }: { message: string; onDismiss: () => void 
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
+type BackendNearbyHit = { userId: string; location?: { lat: number; lon: number }; updatedAt?: string };
+
 export default function MapScreen({ onChatRequest }: { onChatRequest?: (uid: string) => void }) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
@@ -507,6 +499,12 @@ export default function MapScreen({ onChatRequest }: { onChatRequest?: (uid: str
   const [selectedUser, setSelectedUser] = useState<NearbyUser | null>(null);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [myId, setMyId] = useState<string | null>(null);
+  const [nearbyUsers, setNearbyUsers] = useState<NearbyUser[]>([]);
+  const { position } = useLiveLocation();
+  const center = position ? { lat: position.lat, lng: position.lng } : HARDCODED_CENTER;
+  const displayUsers = nearbyUsers;
+  const displayUsersRef = useRef<NearbyUser[]>(displayUsers);
+  displayUsersRef.current = displayUsers;
 
   // Messaging state
   const [pendingRequests, setPendingRequests] = useState<Record<string, PendingRequest>>({}); // keyed by fromId
@@ -570,6 +568,17 @@ export default function MapScreen({ onChatRequest }: { onChatRequest?: (uid: str
     setSocket(s);
     s.emit("register", { userId: myId });
 
+    s.on("nearby_users", (payload: BackendNearbyHit[]) => {
+      const users: NearbyUser[] = (payload ?? []).map((hit) => ({
+        uid: hit.userId,
+        lat: hit.location?.lat ?? 0,
+        lng: hit.location?.lon ?? 0,
+        similarity: 0.5,
+        sharedInterests: [],
+      }));
+      setNearbyUsers(users);
+    });
+
     s.on("chat:incoming", (payload: { fromId: string; preview?: string }) => {
       setPendingRequests(prev => ({
         ...prev,
@@ -579,7 +588,7 @@ export default function MapScreen({ onChatRequest }: { onChatRequest?: (uid: str
     });
 
     s.on("chat:accepted", (payload: { conversationId: string; peerId: string; peerName: string }) => {
-      const peer = HARDCODED_USERS.find(u => u.uid === payload.peerId);
+      const peer = displayUsersRef.current.find(u => u.uid === payload.peerId);
       const convo: AcceptedConvo = {
         conversationId: payload.conversationId,
         peerId: payload.peerId,
@@ -608,12 +617,22 @@ export default function MapScreen({ onChatRequest }: { onChatRequest?: (uid: str
     return () => { s.disconnect(); };
   }, [myId]);
 
+  // ── Emit location to backend so we get nearby_users ──
+  useEffect(() => {
+    if (!socket || !myId || !position) return;
+    socket.emit("location", {
+      lat: Number(position.lat),
+      lng: Number(position.lng),
+      userId: myId,
+    });
+  }, [socket, myId, position?.lat, position?.lng]);
+
   // ── Init map ──
   useEffect(() => {
     if (!leafletLoaded || !mapRef.current || mapInstanceRef.current) return;
     const L = (window as any).L;
     const map = L.map(mapRef.current, {
-      center: [HARDCODED_CENTER.lat, HARDCODED_CENTER.lng],
+      center: [center.lat, center.lng],
       zoom: 15, zoomControl: false, attributionControl: false,
     });
     L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png", { maxZoom: 19 }).addTo(map);
@@ -625,6 +644,13 @@ export default function MapScreen({ onChatRequest }: { onChatRequest?: (uid: str
       existing.forEach(el => el.classList.remove("wl-heart-selected"));
     });
   }, [leafletLoaded]);
+
+  // When we get real position, center the map on it
+  useEffect(() => {
+    if (!position || !mapInstanceRef.current) return;
+    const map = mapInstanceRef.current as { setView: (latlng: [number, number], zoom: number, opts?: { animate: boolean }) => void; getZoom: () => number };
+    map.setView([position.lat, position.lng], map.getZoom(), { animate: true });
+  }, [position?.lat, position?.lng]);
 
   useEffect(() => {
     if (selectedUser) return;
@@ -647,24 +673,24 @@ export default function MapScreen({ onChatRequest }: { onChatRequest?: (uid: str
       html: `<div style="width:18px;height:18px;background:#1abc9c;border:3px solid white;border-radius:50%;box-shadow:0 0 0 5px rgba(26,188,156,0.2),0 0 12px rgba(26,188,156,0.3);"></div>`,
       iconSize: [18, 18], iconAnchor: [9, 9],
     });
-    const youMarker = L.marker([HARDCODED_CENTER.lat, HARDCODED_CENTER.lng], { icon: youIcon });
+    const youMarker = L.marker([center.lat, center.lng], { icon: youIcon });
     youMarker._wavelength = true;
     youMarker.addTo(map);
 
     // 2km ring
-    const ring = L.circle([HARDCODED_CENTER.lat, HARDCODED_CENTER.lng], {
+    const ring = L.circle([center.lat, center.lng], {
       radius: 2000, color: "rgba(192,57,43,0.12)", weight: 1.5, dashArray: "6 4",
       fillColor: "rgba(192,57,43,0.02)", fillOpacity: 1, interactive: false,
     });
     ring._wavelength = true;
     ring.addTo(map);
 
-    HARDCODED_USERS.forEach((user, i) => {
+    displayUsers.forEach((user, i) => {
       const { fill, glow, text } = similarityToColor(user.similarity);
       const pct = Math.round(user.similarity * 100);
 
       // Thread
-      const pts = computeThreadPoints(HARDCODED_CENTER.lat, HARDCODED_CENTER.lng, user.lat, user.lng, i);
+      const pts = computeThreadPoints(center.lat, center.lng, user.lat, user.lng, i);
       const thread = L.polyline(pts, {
         color: "#C0392B", weight: 1.5, opacity: 0.35, smoothFactor: 1.5,
         lineCap: "round", lineJoin: "round", interactive: false,
@@ -695,7 +721,7 @@ export default function MapScreen({ onChatRequest }: { onChatRequest?: (uid: str
       });
       marker.addTo(map);
     });
-  }, [pendingRequests, acceptedConvos]);
+  }, [pendingRequests, acceptedConvos, center.lat, center.lng, displayUsers]);
 
   useEffect(() => {
     if (mapInstanceRef.current && leafletLoaded) redrawMarkers();
@@ -803,7 +829,7 @@ export default function MapScreen({ onChatRequest }: { onChatRequest?: (uid: str
           <span style={{ fontSize: 13, color: "#444", fontWeight: 500 }}>You are here</span>
         </div>
         <div style={{ fontSize: 12, color: "#888", marginBottom: 6 }}>
-          People nearby: <strong style={{ color: "#333" }}>{HARDCODED_USERS.length}</strong>
+          People nearby: <strong style={{ color: "#333" }}>{displayUsers.length}</strong>
         </div>
         <div style={{ fontSize: 12, color: "#888", marginBottom: 10 }}>
           Matching radius: <strong style={{ color: "#333" }}>2 km</strong>
@@ -844,7 +870,7 @@ export default function MapScreen({ onChatRequest }: { onChatRequest?: (uid: str
           onChat={(uid) => {
             setSelectedUser(null);
             onChatRequest?.(uid);
-            const peer = HARDCODED_USERS.find(u => u.uid === uid) ?? null;
+            const peer = displayUsers.find(u => u.uid === uid) ?? null;
             setChatOverlayPeer(peer);
             setChatOverlayOpen(true);
             if (myId) {
@@ -860,7 +886,7 @@ export default function MapScreen({ onChatRequest }: { onChatRequest?: (uid: str
             const req = getPendingFrom(selectedUser.uid);
             if (!req) return;
             const cid = getConvoId(req.fromId, myId);
-            const peer = HARDCODED_USERS.find(u => u.uid === req.fromId);
+            const peer = displayUsers.find(u => u.uid === req.fromId);
             socket.emit("chat:accept", { fromId: req.fromId, toId: myId, conversationId: cid, peerName: "You" });
             const convo: AcceptedConvo = {
               conversationId: cid, peerId: req.fromId, peerName: peer?.name ?? "Someone",
