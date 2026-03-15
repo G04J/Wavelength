@@ -56,4 +56,39 @@ export function useLocationSocketSync() {
       });
     });
   }, [status, position?.lat, position?.lng]);
+
+  // auto-restore user to ES on mount
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(async (res) => {
+      const userId = res.data.user?.id
+      if (!userId) return
+
+      const { data: interests } = await supabase
+        .from("user_interests")
+        .select("interest, category")
+        .eq("user_id", userId)
+
+      if (!interests?.length) return
+
+      const sectionData = {
+        music: interests.filter(r => r.category === "music").map(r => r.interest),
+        tv: interests.filter(r => r.category === "tv").map(r => r.interest),
+        games: interests.filter(r => r.category === "games").map(r => r.interest),
+        interests: interests.filter(r => r.category === "interests").map(r => r.interest),
+      }
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("name")
+        .eq("id", userId)
+        .maybeSingle()
+
+      await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3001"}/api/profile`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, sectionData, name: profile?.name ?? "" })
+      })
+    })
+  }, [])
 }
