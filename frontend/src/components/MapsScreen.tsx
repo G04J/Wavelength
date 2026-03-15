@@ -44,9 +44,9 @@ const HARDCODED_CENTER = { lat: -33.8688, lng: 151.2093 };
 
 // ─── HARDCODED NEARBY USERS — spread across ~2 km radius ────────────────────
 const HARDCODED_USERS: NearbyUser[] = [
-  { uid: "5e6c0537-349c-4b98-aecc-6d6a8ba88fa9", similarity: 0.88, lat: -33.8565, lng: 151.2050, sharedInterests: ["Radiohead", "Elden Ring", "Succession"], name: "Alex" },
+  { uid: "user-1", similarity: 0.88, lat: -33.8565, lng: 151.2050, sharedInterests: ["Radiohead", "Elden Ring", "Succession"], name: "Alex" },
   { uid: "user-2", similarity: 0.72, lat: -33.8720, lng: 151.1900, sharedInterests: ["Bon Iver", "Hollow Knight", "The Bear"], name: "Jordan" },
-  { uid: "35866b09-bf8e-4f8a-befd-3770f4dcd528", similarity: 0.81, lat: -33.8580, lng: 151.2240, sharedInterests: ["Frank Ocean", "Disco Elysium", "Fleabag"], name: "Sam" },
+  { uid: "user-3", similarity: 0.81, lat: -33.8580, lng: 151.2240, sharedInterests: ["Frank Ocean", "Disco Elysium", "Fleabag"], name: "Sam" },
   { uid: "user-4", similarity: 0.10, lat: -33.8830, lng: 151.2180, sharedInterests: ["Tame Impala", "Stardew Valley", "Atlanta"], name: "Riley" },
   { uid: "user-5", similarity: 0.69, lat: -33.8650, lng: 151.1950, sharedInterests: ["Mitski", "Hades", "Severance"], name: "Mika" },
   { uid: "user-6", similarity: 0.46, lat: -33.8810, lng: 151.1980, sharedInterests: ["James Blake", "Celeste", "Skins"], name: "Quinn" },
@@ -78,10 +78,14 @@ function buildCuteHeart(_fill: string, _glow: string, _textColor: string, pct: n
   const brightness = (0.82 + score01 * 0.32).toFixed(2);
 
   const pulseClass = hasPendingRequest ? "wl-heart-pulse" : "";
+  // Position badge on the top-right of the actual heart shape
+  // The heart PNG has some padding, so we offset inward by ~15% of size
+  const badgeTop = Math.round(size * 0.08);
+  const badgeRight = Math.round(size * 0.08);
   const badge = hasPendingRequest
-    ? `<div style="position:absolute;top:-2px;right:-2px;width:16px;height:16px;background:#C0392B;border:2px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;color:white;font-weight:700;z-index:5;">!</div>`
+    ? `<div style="position:absolute;top:${badgeTop}px;right:${badgeRight}px;width:18px;height:18px;background:#C0392B;border:2.5px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;color:white;font-weight:700;z-index:5;box-shadow:0 1px 4px rgba(192,57,43,0.3);">!</div>`
     : hasActiveConvo
-    ? `<div style="position:absolute;top:-2px;right:-2px;width:16px;height:16px;background:#1abc9c;border:2px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:5;"><svg width="8" height="8" viewBox="0 0 24 24" fill="white"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg></div>`
+    ? `<div style="position:absolute;top:${badgeTop}px;right:${badgeRight}px;width:18px;height:18px;background:#1abc9c;border:2.5px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:5;box-shadow:0 1px 4px rgba(26,188,156,0.3);"><svg width="9" height="9" viewBox="0 0 24 24" fill="white"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg></div>`
     : "";
 
   return `
@@ -589,11 +593,9 @@ export default function MapScreen({ onChatRequest }: { onChatRequest?: (uid: str
         return [...prev, convo];
       });
       setSentRequests(prev => { const n = { ...prev }; delete n[payload.peerId]; return n; });
-      // Auto-open chat panel
-      setActiveChatConvo(convo);
-      setChatPanelOpen(true);
+      // Don't auto-open chat — just notify. They can open from inbox or tapping the heart.
       setChatOverlayOpen(false);
-      setSelectedUser(null);
+      setToastMessage(`${payload.peerName ?? "Someone"} accepted your message! 🎉`);
     });
 
     s.on("chat:message", (payload: ChatMessage) => {
@@ -845,12 +847,10 @@ export default function MapScreen({ onChatRequest }: { onChatRequest?: (uid: str
             const peer = HARDCODED_USERS.find(u => u.uid === uid) ?? null;
             setChatOverlayPeer(peer);
             setChatOverlayOpen(true);
-            if (myId && socket) {
-              socket.emit("chat:request", { fromId: myId, toId: uid });
+            if (myId) {
               const cid = getConvoId(myId, uid);
               setChatOverlayCid(cid);
               setConversations(prev => prev[cid] ? prev : { ...prev, [cid]: [] });
-              setSentRequests(prev => ({ ...prev, [uid]: "" }));
             }
           }}
           mode={popupMode}
